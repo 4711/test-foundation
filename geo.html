@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8" />
+	
+	<!-- Set the viewport width to device width for mobile -->
+	<meta name="viewport" content="width=device-width" />
+	
+	<title>HTML5 GeoLocation</title>
+  
+	<!-- Included CSS Files -->
+	<link rel="stylesheet" href="stylesheets/foundation.css">
+	<link rel="stylesheet" href="stylesheets/app.css">
+	
+	<!--[if lt IE 9]>
+		<link rel="stylesheet" href="stylesheets/ie.css">
+	<![endif]-->
+
+	
+	<!-- IE Fix for HTML5 Tags -->
+	<!--[if lt IE 9]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+</head>
+<body>
+
+	<!-- container -->
+	<div class="container">
+		
+		<div class="row">
+			<div class="twelve columns">
+				<h2>HTML5 GeoLocation</h2>
+				<p>Find your position with HTML5 and Google maps API</p>
+		
+				<hr />
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="twelve columns">
+				<h3>Locate your position</h3>
+
+				<!-- Grid Example -->
+    			<p><a href="#" id="locate-button" class="nice radius small blue button" onClick="getLocation();">Where am I?</a></p>
+			</div>
+	
+		</div>
+
+		<div class="row">
+			<div class="eight columns">
+				<div id="geo-wrapper" class="panel">
+				</div>
+			</div>
+
+			<div class="four columns">			
+				<div id="live-geolocation" class="panel">
+				</div>
+			</div>
+
+		</div>
+		
+	</div>
+	<!-- container -->
+	
+	
+
+
+	<!-- Included JS Files -->
+	<script src="javascripts/foundation.js"></script>
+	<script src="javascripts/app.js"></script>
+	<script src="javascripts/jquery.orbit.js"></script>
+	<script src="javascripts/jquery.js"></script>
+	<script src="javascripts/modernizr.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+
+	<script>
+
+		function getLocation() {
+  			if (navigator.geolocation) {
+    			navigator.geolocation.getCurrentPosition(success, error);
+  			} else {
+	  			$("#live-geolocation").show().html('Ihr Browser unterstützt keine Geolocation.');
+  			}
+		}
+
+		function error(error) {
+  			var text = "Fehlercode : " + error.code + "\n"
+           			 + "Message    : " + error.message;
+  			$("#live-geolocation").show().html(text);
+		}
+
+		function success(loc) {
+			var geocoder = new google.maps.Geocoder();
+			var latlng = new google.maps.LatLng(loc.coords.latitude, loc.coords.longitude)
+  			var text = "";
+  			geocoder.geocode({'latLng': latlng}, function(results, status) {
+    			if (status == google.maps.GeocoderStatus.OK) {
+      				if (results[0]) {
+			  			text = "<h4>Found Location</h4>" 
+			  			    + "Longitude: " + loc.coords.longitude + "<br>" 
+           					+ "Latitude: "   + loc.coords.latitude   + "<br>" 
+           					+ "Accuracy: "   + loc.coords.accuracy   + "<br>" 
+           					+ "Adress: "     + results[0].formatted_address;
+			  			$("#locate-button").removeClass("small blue").addClass("small green").html("Try again?");
+			  			$("#live-geolocation").show().html(text);
+
+			  			$("#geo-wrapper").show().css({'width':'600px','height':'500px'});
+  						var map = new google.maps.Map(document.getElementById("geo-wrapper"), 
+  			              {zoom: 14, mapTypeControl:true, zoomControl: true, 
+	  			           mapTypeId: google.maps.MapTypeId.ROADMAP});
+  						var center = new google.maps.LatLng(loc.coords.latitude, loc.coords.longitude);  
+  						map.setCenter(center);
+  						var marker = new google.maps.Marker({map: map, position: center, draggable: false, 
+	  			                                 title: "You are here (more or less)"});
+  	    			
+      				}
+    			} else {
+    				text = "Adresse konnte nicht ermittelt werden: " + status;
+		  			$("#live-geolocation").show().html(text);
+    			}
+  			});
+		}
+		$(function() {
+			$("#geo-wrapper").hide();
+			$("#live-geolocation").hide();
+		});
+
+
+	</script>
+
+
+</body>
+</html>
